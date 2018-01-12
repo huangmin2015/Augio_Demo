@@ -214,21 +214,8 @@ void CodecRegWrite1(unsigned int baseAddr, unsigned char regAddr,
 /*
 ** Reads a codec register contents
 */
-unsigned char CodecRegRead1(unsigned int baseAddr, unsigned char regAddr)
-{
-    unsigned int retVal = I2C_SUCCESS;
-#ifdef CODEC_INTERFACE_I2C
-    slaveData[0] = regAddr;
-     /* Receive the register contents in slaveData */
-    retVal = I2CCodecRcvBlocking(baseAddr, 1);
 
-    if (I2C_SUCCESS != retVal)
-    {
-    }
-#endif
-    return (slaveData[0]);
-}
-unsigned int CodecRegRead(unsigned int baseAddr, unsigned char regAddr)
+unsigned char CodecRegRead(unsigned int baseAddr, unsigned char regAddr)
 {
     unsigned int retVal = I2C_SUCCESS;
 #ifdef CODEC_INTERFACE_I2C
