@@ -246,7 +246,7 @@ void CodecRegBitSet(unsigned int baseAddr, unsigned char regAddr,
     if (I2C_SUCCESS != retVal)
     {
          //printf("\r\nI2C Read Failed\n");
-         retVal = retVal;
+         //retVal = retVal;
     }
     slaveData[1] =  slaveData[0] | bitMask;
     slaveData[0] = regAddr;

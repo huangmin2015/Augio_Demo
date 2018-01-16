@@ -473,8 +473,8 @@ Void Aic31_init(Void)
         /* To remove the compiler warning                                     */
         if ((NULL != cbFxn) && (NULL != cbArg))
         {
-            cbFxn = cbFxn;
-            cbArg = cbArg;
+           // cbFxn = cbFxn;
+           // cbArg = cbArg;
         }
 
         /* copy the initial parameters to the channel                         */
@@ -1004,12 +1004,12 @@ Void Aic31_init(Void)
     /* to remove compiler warning                                             */
     if (NULL != chanp)
     {
-        chanp = chanp;
+        //chanp = chanp;
     }
 
     if (NULL != ioPacket)
     {
-        ioPacket = ioPacket;
+        //ioPacket = ioPacket;
     }
     
     /* not implemented   */

@@ -42,6 +42,7 @@
 								<option id="com.ti.ccstudio.buildDefinitions.C6000_8.1.compilerID.DIAG_WRAP.1579846565" name="Wrap diagnostic messages (--diag_wrap)" superClass="com.ti.ccstudio.buildDefinitions.C6000_8.1.compilerID.DIAG_WRAP" useByScannerDiscovery="false" value="com.ti.ccstudio.buildDefinitions.C6000_8.1.compilerID.DIAG_WRAP.off" valueType="enumerated"/>
 								<option id="com.ti.ccstudio.buildDefinitions.C6000_8.1.compilerID.INCLUDE_PATH.648223287" name="Add dir to #include search path (--include_path, -I)" superClass="com.ti.ccstudio.buildDefinitions.C6000_8.1.compilerID.INCLUDE_PATH" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${COM_TI_UIA_INCLUDE_PATH}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/include}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${NDK_INCLUDE_PATH}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${IPC_INCLUDE_PATH}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${EDMA3_LLD_INCLUDE_PATH}&quot;"/>
@@ -49,8 +50,6 @@
 									<listOptionValue builtIn="false" value="&quot;${BIOS_INCLUDE_PATH}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${PROJECT_ROOT}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${PDK_INSTALL_PATH}&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${PDK_INSTALL_PATH}/ti/drv/mcasp/example/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${PDK_INSTALL_PATH}/ti/drv/mcasp/example/evmAM572x/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${PDK_INSTALL_PATH}/ti/drv/mcasp/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${PDK_INSTALL_PATH}/ti/drv/mcasp&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${PDK_INSTALL_PATH}/ti/board&quot;"/>
