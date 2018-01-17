@@ -61,13 +61,13 @@ extern void I2CCodecIfInit(unsigned int baseAddr, unsigned int intCh,
 /*
 ** Function to be used by codecs
 */
-extern void CodecRegWrite(unsigned int baseAddr, unsigned char regAddr,
+extern void CodecRegWrite(unsigned int baseAddr,unsigned char slaveAddr, unsigned char regAddr,
                           unsigned char regData);
-extern void CodecRegBitSet(unsigned int baseAddr, unsigned char regAddr,
+extern void CodecRegBitSet(unsigned int baseAddr,unsigned char slaveAddr, unsigned char regAddr,
                            unsigned char bitMask);
-extern void CodecRegBitClr(unsigned int baseAddr, unsigned char regAddr,
+extern void CodecRegBitClr(unsigned int baseAddr,unsigned char slaveAddr, unsigned char regAddr,
                            unsigned char bitMask);
-extern unsigned char CodecRegRead(unsigned int baseAddr,
+extern unsigned char CodecRegRead(unsigned int baseAddr,unsigned char slaveAddr,
                                   unsigned char regAddr);
 
 #endif

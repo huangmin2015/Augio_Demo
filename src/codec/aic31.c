@@ -485,8 +485,8 @@ Void Aic31_init(Void)
         I2CCodecIfInit (instHandle->acBaseAddress, 2, instHandle->acCodecId);
         //MCASP_log("sys/bios init codec aic31~~~~~.\n");
         /* Configure the Codec for I2S mode */
-       // while(1){
-         //   Task_sleep(10);
+        //while(1){
+            Task_sleep(10);
         AIC31Reset(instHandle->acBaseAddress);
         //msleep(50);
        // }
@@ -1515,7 +1515,7 @@ static Bool aic31I2cWrite(Aic31_Object    *instHandle,
             break;
         }
 #else
-        CodecRegWrite(instHandle->acBaseAddress, regIndex, ((*regData) & 0xFF));
+        CodecRegWrite(instHandle->acBaseAddress,AIC31_I2C_ADDR, regIndex, ((*regData) & 0xFF));
         retVal = Aic31_REG_WRITE_PASS;
 #endif /* SW_I2C */
         /* Maintain the register data pointer and register index */
@@ -1712,7 +1712,7 @@ static Bool aic31I2cRead(Aic31_Object         *instHandle,
             break;
         }
 #else
-        CodecRegRead(instHandle->acBaseAddress, regIndex);
+        CodecRegRead(instHandle->acBaseAddress,AIC31_I2C_ADDR, regIndex);
         retVal= Aic31_REG_READ_PASS;
 #endif /* SW_I2C */
     }

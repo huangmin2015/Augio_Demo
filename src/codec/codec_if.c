@@ -70,8 +70,8 @@
 **                      INTERNAL FUNCTION PROTOTYPES
 *******************************************************************************/
 
-static unsigned int I2CCodecSendBlocking(unsigned int baseAddr, unsigned int dataCnt);
-static unsigned int I2CCodecRcvBlocking(unsigned int baseAddr, unsigned int dataCnt);
+static unsigned int I2CCodecSendBlocking(unsigned int baseAddr,unsigned char slaveAddr, unsigned int dataCnt);
+static unsigned int I2CCodecRcvBlocking(unsigned int baseAddr,unsigned char slaveAddr, unsigned int dataCnt);
 /******************************************************************************
 **                      INTERNAL VARIABLE DEFINITIONS
 *******************************************************************************/
@@ -129,12 +129,12 @@ void I2CCodecIfInit(unsigned int baseAddr, unsigned int intCh,
 /*
 ** Function to send data through i2c
 */
-static unsigned int I2CCodecSendBlocking(unsigned int baseAddr, unsigned int dataCnt)
+static unsigned int I2CCodecSendBlocking(unsigned int baseAddr,unsigned char slaveAddr, unsigned int dataCnt)
 {
     unsigned int status = I2C_SUCCESS;
     I2C_Transaction i2cTransaction;
     I2C_transactionInit(&i2cTransaction);
-    i2cTransaction.slaveAddress = I2C_slaveAddr;
+    i2cTransaction.slaveAddress = slaveAddr;
     i2cTransaction.writeBuf = (uint8_t *)&slaveData[0];
     i2cTransaction.writeCount = dataCnt;
     i2cTransaction.readBuf = (uint8_t *)NULL;
@@ -147,7 +147,7 @@ static unsigned int I2CCodecSendBlocking(unsigned int baseAddr, unsigned int dat
 /*
 ** Function to receive data from the Codec through I2C bus
 */
-static unsigned int I2CCodecRcvBlocking(unsigned int baseAddr, unsigned int dataCnt)
+static unsigned int I2CCodecRcvBlocking(unsigned int baseAddr,unsigned char slaveAddr, unsigned int dataCnt)
 {
     unsigned int status = I2C_SUCCESS;
     unsigned char writebuf[1];
@@ -155,7 +155,7 @@ static unsigned int I2CCodecRcvBlocking(unsigned int baseAddr, unsigned int data
 
     writebuf[0]=slaveData[0];
     I2C_transactionInit(&i2cTransaction);
-    i2cTransaction.slaveAddress = I2C_slaveAddr;
+    i2cTransaction.slaveAddress = slaveAddr;
     i2cTransaction.writeBuf = (uint8_t *)&writebuf[0];
     i2cTransaction.writeCount = 1;
     i2cTransaction.readBuf = (uint8_t *)&slaveData[0];
@@ -170,7 +170,7 @@ static unsigned int I2CCodecRcvBlocking(unsigned int baseAddr, unsigned int data
 /*
 ** Writes a codec register with the given data value
 */
-void CodecRegWrite(unsigned int baseAddr, unsigned char regAddr,
+void CodecRegWrite(unsigned int baseAddr, unsigned char slaveAddr, unsigned char regAddr,
                    unsigned char regData)
 {
     unsigned int retVal = I2C_SUCCESS;
@@ -181,19 +181,18 @@ void CodecRegWrite(unsigned int baseAddr, unsigned char regAddr,
     slaveData[0] = regAddr;
     slaveData[1] = regData;
 
-    retVal = I2CCodecSendBlocking(baseAddr, 2);
+    retVal = I2CCodecSendBlocking(baseAddr,slaveAddr, 2);
 
     if (I2C_SUCCESS != retVal)
     {
     }
 #endif
 }
-void CodecRegWrite1(unsigned int baseAddr, unsigned char regAddr,
+void CodecRegWrite_wm8960(unsigned int baseAddr, unsigned char slaveAddr,unsigned char regAddr,
                    unsigned int regData)
 {
     unsigned int retVal = I2C_SUCCESS;
 #ifdef CODEC_INTERFACE_I2C
-
     /* Send the register address and data */
     unsigned int daWord;
     daWord=0;
@@ -202,38 +201,53 @@ void CodecRegWrite1(unsigned int baseAddr, unsigned char regAddr,
     slaveData[0] = (daWord>>8);
     slaveData[1] = daWord & 0xff;
 
-
-    retVal = I2CCodecSendBlocking(baseAddr, 2);
+    retVal = I2CCodecSendBlocking(baseAddr,slaveAddr, 2);
 
     if (I2C_SUCCESS != retVal)
     {
     }
 #endif
 }
+void CodecRegWrite_PCM1864(unsigned int baseAddr,unsigned char slaveAddr, unsigned char regAddr,
+                   unsigned char regData)
+{
+    unsigned int retVal = I2C_SUCCESS;
+#ifdef CODEC_INTERFACE_I2C
 
+    /* Send the register address and data */
+    slaveData[0] = regAddr;
+    slaveData[1] = regData;
+
+    retVal = I2CCodecSendBlocking(baseAddr,slaveAddr, 2);
+
+    if (I2C_SUCCESS != retVal)
+    {
+    }
+#endif
+}
 /*
 ** Reads a codec register contents
 */
-
-unsigned char CodecRegRead(unsigned int baseAddr, unsigned char regAddr)
+unsigned char CodecRegRead(unsigned int baseAddr,unsigned char slaveAddr, unsigned char regAddr)
 {
     unsigned int retVal = I2C_SUCCESS;
 #ifdef CODEC_INTERFACE_I2C
     slaveData[0] = regAddr;
      /* Receive the register contents in slaveData */
-    retVal = I2CCodecRcvBlocking(baseAddr, 2);
+    retVal = I2CCodecRcvBlocking(baseAddr,slaveAddr, 1);
 
     if (I2C_SUCCESS != retVal)
     {
     }
 #endif
-    return (slaveData[0]<<8|slaveData[1]);
+    return (slaveData[0]);
 }
+
 
 /*
 ** Sets codec register bit specified in the bit mask
 */
-void CodecRegBitSet(unsigned int baseAddr, unsigned char regAddr,
+void CodecRegBitSet(unsigned int baseAddr,unsigned char slaveAddr,unsigned char regAddr,
                     unsigned char bitMask)
 {
     unsigned int retVal = 0;
@@ -242,7 +256,7 @@ void CodecRegBitSet(unsigned int baseAddr, unsigned char regAddr,
     /* Send the register address */
     slaveData[0] = regAddr;
     /* Receive the register contents in slaveData */
-    retVal = I2CCodecRcvBlocking(baseAddr, 2);
+    retVal = I2CCodecRcvBlocking(baseAddr,slaveAddr, 2);
     if (I2C_SUCCESS != retVal)
     {
          //printf("\r\nI2C Read Failed\n");
@@ -251,7 +265,7 @@ void CodecRegBitSet(unsigned int baseAddr, unsigned char regAddr,
     slaveData[1] =  slaveData[0] | bitMask;
     slaveData[0] = regAddr;
 
-    retVal = I2CCodecSendBlocking(baseAddr, 2);
+    retVal = I2CCodecSendBlocking(baseAddr,slaveAddr, 2);
     if (I2C_SUCCESS != retVal)
     {
     }
@@ -261,7 +275,7 @@ void CodecRegBitSet(unsigned int baseAddr, unsigned char regAddr,
 /*
 ** Clears codec register bits specified in the bit mask
 */
-void CodecRegBitClr(unsigned int baseAddr, unsigned char regAddr,
+void CodecRegBitClr(unsigned int baseAddr, unsigned char slaveAddr,unsigned char regAddr,
                     unsigned char bitMask)
 {
     unsigned int retVal = 0;
@@ -271,13 +285,13 @@ void CodecRegBitClr(unsigned int baseAddr, unsigned char regAddr,
     /* Send the register address */
     slaveData[0] = regAddr;
     /* Receive the register contents in slaveData */
-    retVal = I2CCodecRcvBlocking(baseAddr, 1);
+    retVal = I2CCodecRcvBlocking(baseAddr,slaveAddr, 1);
     {
     }
     slaveData[1] =  slaveData[0] & ~bitMask;
     slaveData[0] = regAddr;
 
-    retVal = I2CCodecSendBlocking(baseAddr, 2);
+    retVal = I2CCodecSendBlocking(baseAddr,slaveAddr, 2);
     if (I2C_SUCCESS != retVal)
     {
     }

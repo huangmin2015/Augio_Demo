@@ -48,7 +48,7 @@
 #include <codec_if.h>
 #include <aic31_if.h>
 #include <ICodec.h>
-
+#include <mcasp_cfg.h>
 /******************************************************************************
 **                      INTERNAL MACRO DEFINITIONS
 *******************************************************************************/
@@ -177,87 +177,19 @@
  * \return  None.
  *
  **/
- void wm8960_init(unsigned int baseAddr)
-{
-
-
-    // 重置
-    CodecRegWrite1(baseAddr, 0xf, 0x0);
-    // 设置电源   /*鐢垫簮*/
-    CodecRegWrite1(baseAddr, 0x19, 1<<8 | 1<<7 | 1<<6 | 1<<5 | 1<<4 | 1<<3 | 1<<2 | 1<<1);
-   // CodecRegWrite1(baseAddr, 0x19, 1<<8 | 1<<7 | 1<<6 | 1<<5 | 1<<4 | 1<<1);
-    CodecRegWrite1(baseAddr, 0x1a, 1<<8 | 1<<7 | 1<<6 | 1<<5 | 1<<4 | 1<<3 | 1<<2 | 1<<1);
-    CodecRegWrite1(baseAddr, 0x2F, 1<<5 | 1<<4 | 1<<3 | 1<<2 );
-
-    //ADCLRC/GPIO Pin For GPIO; ADCCLK From  DACClK
-    CodecRegWrite1(baseAddr, 0x9, 0x40);
-    // 设置时钟   clk
-    //Mclk--div1-->SYSCLK---DIV256--->DAC/ADC sample Freq=11.289(MCLK)/256=44.1KHZ
-    //CodecRegWrite(baseAddr, 0x4, 0x0);
-	CodecRegWrite1(baseAddr, 0x4, 0x04);  //sysclk=22.5792(MCLK)/(2)=11.289MHz Freq=11.289(MCLK)/256=44.1KHZ
-
-    // 设置ADC-DAC
-    CodecRegWrite1(baseAddr, 0x5, 0x0);
-
-    CodecRegWrite1(baseAddr, 0x15, 0x1ff);
-    CodecRegWrite1(baseAddr, 0x16, 0x1ff);
-
-
-    // 设置audio interface
-    /* data format: I2S
-       word length: 32 bits  */
-    CodecRegWrite1(baseAddr, 0x7, 0x0e);
-
-    // 设置OUTPUTS   //volume
-    CodecRegWrite1(baseAddr, 0x2, 0xFF | 0x100);
-    CodecRegWrite1(baseAddr, 0x3, 0xFF | 0x100);
-    //set by pass
-    //Letf DAC to Left Output Mixer
-    CodecRegWrite1(baseAddr, 0x22,  1 <<8);
-    //Right DAC to Right Output Mixer
-    CodecRegWrite1(baseAddr, 0x25,  1 <<8 );
-    //Reserved
-    CodecRegWrite1(baseAddr, 0x26, 1 <<7 );
-    CodecRegWrite1(baseAddr, 0x27, 1 <<7 );
-    //Letf Speaker Volume
-    CodecRegWrite1(baseAddr, 0x28, 0xf9 | 0x100);
-    //Right Speaker Volume
-    CodecRegWrite1(baseAddr, 0x29, 0xf9 | 0x100);
-    //by pass setup
-    //CodecRegWrite1(baseAddr, 0x2d, 1 <<7 );
-    //CodecRegWrite1(baseAddr, 0x2e, 1 <<7 );
-    //class D Control  L/R Speakers enabled
-    CodecRegWrite1(baseAddr, 0x31,  1 <<7 | 1<<6 );
-
-    //setup input  INPUT1 INPUT2 INPUT3 CONNECTED TO ADC
-    CodecRegWrite1(baseAddr, 0x20, 1<<8 | 1 <<7 | 1 <<6  | 1 <<3);
-    CodecRegWrite1(baseAddr, 0x21, 1<<8 | 1 <<7 | 1 <<6  | 1 <<3);
-
-    CodecRegWrite1(baseAddr, 0x00, 0x117);
-    CodecRegWrite1(baseAddr, 0x01, 0x117);
-
-    // 设置DAC VOLUME
-    CodecRegWrite1(baseAddr, 0xa, 0xFF | 0x100);
-    CodecRegWrite1(baseAddr, 0xb, 0xFF | 0x100);
-    CodecRegWrite1(baseAddr, 0x2c, 0X24);
-    CodecRegWrite1(baseAddr, 0x2b, 0X24);
 
 
 
-
-    return;
-
-}
 void AIC31Reset(unsigned int baseAddr)
 {
     /* Select Page 0 */
     regval=5;
 
-    wm8960_init(baseAddr);
+    PCM1864_init(baseAddr);
     //CodecRegWrite(baseAddr, AIC31_P0_REG0, 0);
 
     /* Reset the codec */
-   // CodecRegWrite(baseAddr, AIC31_P0_REG1, AIC31_RESET);*/
+   // CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG1, AIC31_RESET);*/
 }
 
 /**
@@ -303,14 +235,14 @@ void AIC31DataConfig(unsigned int baseAddr, unsigned char dataType,
     }
 
     /* Write the data type and  slot width */
-    CodecRegWrite(baseAddr, AIC31_P0_REG9, (cDataType | slot));
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG9, (cDataType | slot));
 
     /* valid data after dataOff number of clock cycles */
-    CodecRegWrite(baseAddr, AIC31_P0_REG10, dataOff);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG10, dataOff);
 
 #if defined (MCASP_MASTER)
     /* use PLL_CLK_IN as BCLK */
-    CodecRegWrite(baseAddr, AIC31_P0_REG102, 0xA2);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG102, 0xA2);
 #endif
 
 }
@@ -404,33 +336,33 @@ void AIC31SampleRateConfig(unsigned int baseAddr, unsigned int mode,
     temp = (mode & fs);
 
     /* Set the sample Rate */
-    CodecRegWrite(baseAddr, AIC31_P0_REG2, temp);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG2, temp);
 
-    CodecRegWrite(baseAddr, AIC31_P0_REG3, 0xA0 | pllPval);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG3, 0xA0 | pllPval);
 
     /* use PLL_CLK_IN as MCLK */
-    CodecRegWrite(baseAddr, AIC31_P0_REG102, 0x02);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG102, 0x02);
 
     /* Use CLKDIV_OUT as codec CLK IN */
-    CodecRegWrite(baseAddr, AIC31_P0_REG101, 0x01);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG101, 0x01);
 
     /* Select GPIO to output the divided PLL IN */
     //CodecRegWrite(baseAddr, AIC31_P0_REG98, 0x20);
 /*
     temp = (pllJval << 2);
-    CodecRegWrite(baseAddr, AIC31_P0_REG4, temp); */
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG4, temp); */
 
     /* Configure the PLL divide registers */
- /*   CodecRegWrite(baseAddr, AIC31_P0_REG5, (pllDval >> 6) & 0xFF);
-    CodecRegWrite(baseAddr, AIC31_P0_REG6, (pllDval & 0x3F) << 2);
+ /*   CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG5, (pllDval >> 6) & 0xFF);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG6, (pllDval & 0x3F) << 2);
 
     temp = pllRval;
-    CodecRegWrite(baseAddr, AIC31_P0_REG11, temp); */
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG11, temp); */
 
     /* Enable the codec to be master for fs and bclk */
-    CodecRegWrite(baseAddr, AIC31_P0_REG8, 0xD0);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG8, 0xD0);
 
-    CodecRegWrite(baseAddr, AIC31_P0_REG7, ref);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR,AIC31_P0_REG7, ref);
 }
 
 /**
@@ -444,20 +376,20 @@ void AIC31SampleRateConfig(unsigned int baseAddr, unsigned int mode,
 void AIC31ADCInit(unsigned int baseAddr)
 {
     /* enable the programmable PGA for left and right ADC  */
-    CodecRegWrite(baseAddr, AIC31_P0_REG15, 0x00);
-    CodecRegWrite(baseAddr, AIC31_P0_REG16, 0x00);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG15, 0x00);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG16, 0x00);
 
     /* MIC1R is not connected to the left ADC PGA */
-    CodecRegWrite(baseAddr, AIC31_P0_REG17, 0x0F);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG17, 0x0F);
 
     /* MIC1L is not connected to the right ADC PGA */
-    CodecRegWrite(baseAddr, AIC31_P0_REG18, 0xF0);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG18, 0xF0);
 
     /* power on the Line L1R */
-    CodecRegWrite(baseAddr, AIC31_P0_REG19, 0x7C);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG19, 0x7C);
 
     /* power on the Line L2R */
-    CodecRegWrite(baseAddr, AIC31_P0_REG22, 0x7C);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG22, 0x7C);
 }
 
 /**
@@ -472,75 +404,75 @@ void AIC31DACInit(unsigned int baseAddr)
 {
 
 	/* Codec Datapath Setup */
-	CodecRegWrite(baseAddr, AIC31_P0_REG7, 0x8A);
+	CodecRegWrite(baseAddr, AIC31_I2C_ADDR,AIC31_P0_REG7, 0x8A);
 
     /* select the DAC L1 R1 Paths */
-    CodecRegWrite(baseAddr, AIC31_P0_REG41, 0x02);
-    CodecRegWrite(baseAddr, AIC31_P0_REG42, 0x6C);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG41, 0x02);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG42, 0x6C);
 
 
     /* DAC L to HPLOUT Is connected */
-    CodecRegWrite(baseAddr, AIC31_P0_REG47, 0x80);
-    CodecRegWrite(baseAddr, AIC31_P0_REG51, 0x09);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG47, 0x80);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG51, 0x09);
 
     /* DAC R to HPROUT is connected */
-    CodecRegWrite(baseAddr, AIC31_P0_REG64, 0x80);
-    CodecRegWrite(baseAddr, AIC31_P0_REG65, 0x09);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG64, 0x80);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG65, 0x09);
 
     /* DACL1 connected to LINE1 LOUT */
-    CodecRegWrite(baseAddr, AIC31_P0_REG82, 0x80);
-    CodecRegWrite(baseAddr, AIC31_P0_REG86, 0x09);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG82, 0x80);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG86, 0x09);
 
     /* DACR1 connected to LINE1 ROUT */
-    CodecRegWrite(baseAddr, AIC31_P0_REG92, 0x80);
-    CodecRegWrite(baseAddr, AIC31_P0_REG93, 0x09);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG92, 0x80);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG93, 0x09);
 
     /* unmute the DAC */
-    CodecRegWrite(baseAddr, AIC31_P0_REG43, 0x00);
-    CodecRegWrite(baseAddr, AIC31_P0_REG44, 0x00);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG43, 0x00);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG44, 0x00);
 
     /* DAC Quiescent Current Adjustment */
     //CodecRegWrite(baseAddr, AIC31_P0_REG109, 0xC0);
 
 	/* power up the left and right DACs */
-    CodecRegWrite(baseAddr, AIC31_P0_REG37, 0xE0);
+    CodecRegWrite(baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG37, 0xE0);
 }
 
 void AIC31ADCDeInit (unsigned int baseAddr)
 {
     /* Write the reset values to ADC registers                                */
-    CodecRegWrite (baseAddr, AIC31_P0_REG15, (uint8_t)0x00);
-    CodecRegWrite (baseAddr, AIC31_P0_REG16, (uint8_t)0x00);
-    CodecRegWrite (baseAddr, AIC31_P0_REG17, (uint8_t)0xFF);
-    CodecRegWrite (baseAddr, AIC31_P0_REG18, (uint8_t)0xFF);
-    CodecRegWrite (baseAddr, AIC31_P0_REG19, (uint8_t)0x78);
-    CodecRegWrite (baseAddr, AIC31_P0_REG22, (uint8_t)0x78);
-    CodecRegWrite (baseAddr, AIC31_P0_REG26, (uint8_t)0x00);
-    CodecRegWrite (baseAddr, AIC31_P0_REG27, (uint8_t)0xFE);
-    CodecRegWrite (baseAddr, AIC31_P0_REG28, (uint8_t)0x00);
-    CodecRegWrite (baseAddr, AIC31_P0_REG29, (uint8_t)0x00);
-    CodecRegWrite (baseAddr, AIC31_P0_REG30, (uint8_t)0xFE);
-    CodecRegWrite (baseAddr, AIC31_P0_REG31, (uint8_t)0x00);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG15, (uint8_t)0x00);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG16, (uint8_t)0x00);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG17, (uint8_t)0xFF);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG18, (uint8_t)0xFF);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG19, (uint8_t)0x78);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG22, (uint8_t)0x78);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG26, (uint8_t)0x00);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG27, (uint8_t)0xFE);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG28, (uint8_t)0x00);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG29, (uint8_t)0x00);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG30, (uint8_t)0xFE);
+    CodecRegWrite (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG31, (uint8_t)0x00);
 }
 
 void AIC31DACDeInit (unsigned int baseAddr)
 {
     /* Write the reset values to DAC registers                                */
 
-    CodecRegBitClr (baseAddr, AIC31_P0_REG101, (uint8_t)0x1E);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG37,  (uint8_t)0x00);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG38,  (uint8_t)0x00);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG41,  (uint8_t)0x00);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG42,  (uint8_t)0x00);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG43,  (uint8_t)0x80);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG44,  (uint8_t)0x80);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG51,  (uint8_t)0x04);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG64,  (uint8_t)0x00);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG65,  (uint8_t)0x04);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG82,  (uint8_t)0x00);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG86,  (uint8_t)0x00);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG92,  (uint8_t)0x00);
-    CodecRegWrite  (baseAddr, AIC31_P0_REG93,  (uint8_t)0x00);
+    CodecRegBitClr (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG101, (uint8_t)0x1E);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG37,  (uint8_t)0x00);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG38,  (uint8_t)0x00);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG41,  (uint8_t)0x00);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG42,  (uint8_t)0x00);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG43,  (uint8_t)0x80);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG44,  (uint8_t)0x80);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG51,  (uint8_t)0x04);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG64,  (uint8_t)0x00);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG65,  (uint8_t)0x04);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG82,  (uint8_t)0x00);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG86,  (uint8_t)0x00);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG92,  (uint8_t)0x00);
+    CodecRegWrite  (baseAddr,AIC31_I2C_ADDR, AIC31_P0_REG93,  (uint8_t)0x00);
 }
 
 /***************************** End Of File ***********************************/

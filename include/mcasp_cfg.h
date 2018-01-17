@@ -77,10 +77,13 @@ extern "C"
 #define I2C_MCASP_INSTANCE 3
 
 #define AIC31_NUM_INSTANCES   1
-#define AIC31_INST0_ADDRESS   0x4a//0x18
+#define AIC31_INST0_ADDRESS   0x4a//0x4a//0x1a
 
 #define MCASP_RX_DMA_CH  CSL_EDMA3_CHA_MCASP2_RX
 #define MCASP_TX_DMA_CH  CSL_EDMA3_CHA_MCASP2_TX
+
+//I2C slave addr
+#define AIC31_I2C_ADDR 0X18
 
 extern void GblErr(int arg);
 extern Mcasp_HwSetupData mcaspRcvSetup;
