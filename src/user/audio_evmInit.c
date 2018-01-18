@@ -234,8 +234,32 @@ void McASP3_Enable1(void)  //modify by hum
             HW_WR_FIELD32(CSL_DSP_CKGEN_CM_CORE_AON_REGS+CSL_CKGEN_CM_CORE_AON_CM_CLKMODE_DPLL_ABE_REG, \
                     CSL_CKGEN_CM_CORE_AON_CM_CLKMODE_DPLL_ABE_REG_DPLL_EN, \
                     CSL_CKGEN_CM_CORE_AON_CM_CLKMODE_DPLL_ABE_REG_DPLL_EN_DPLL_LOCK_MODE);
+#if 1
+        /* McASP5 Module Control */
+        HW_WR_FIELD32(CSL_DSP_L4PER_CM_CORE_REGS+CSL_L4PER_CM_CORE_COMPONENT_CM_L4PER2_MCASP5_CLKCTRL_REG, \
+                CSL_L4PER_CM_CORE_COMPONENT_CM_L4PER2_MCASP5_CLKCTRL_REG_MODULEMODE, \
+                CSL_L4PER_CM_CORE_COMPONENT_CM_L4PER2_MCASP5_CLKCTRL_REG_MODULEMODE_ENABLE);
+        while (HW_RD_REG32(CSL_DSP_L4PER_CM_CORE_REGS+CSL_L4PER_CM_CORE_COMPONENT_CM_L4PER2_MCASP5_CLKCTRL_REG) != \
+                CSL_L4PER_CM_CORE_COMPONENT_CM_L4PER2_MCASP5_CLKCTRL_REG_MODULEMODE_ENABLE) ;
 
-        /* McASP3 Module Control */
+
+     /* PAD IO Config for McASP5 pins - ACLKX, AFSX, AXR0, AXR1*/
+
+        HW_WR_FIELD32(CSL_DSP_CORE_PAD_IO_REGISTERS_REGS+CSL_CONTROL_CORE_PAD_IO_PAD_MCASP5_ACLKX, \
+            CSL_CONTROL_CORE_PAD_IO_PAD_MCASP5_ACLKX_MCASP5_ACLKX_MUXMODE, \
+            0x0);
+        HW_WR_FIELD32(CSL_DSP_CORE_PAD_IO_REGISTERS_REGS+CSL_CONTROL_CORE_PAD_IO_PAD_MCASP5_FSX, \
+                CSL_CONTROL_CORE_PAD_IO_PAD_MCASP5_FSX_MCASP5_FSX_MUXMODE, \
+            0x0);
+        HW_WR_FIELD32(CSL_DSP_CORE_PAD_IO_REGISTERS_REGS+CSL_CONTROL_CORE_PAD_IO_PAD_MCASP5_AXR0, \
+                CSL_CONTROL_CORE_PAD_IO_PAD_MCASP5_AXR0_MCASP5_AXR0_MUXMODE, \
+            0x0);
+        HW_WR_FIELD32(CSL_DSP_CORE_PAD_IO_REGISTERS_REGS+CSL_CONTROL_CORE_PAD_IO_PAD_MCASP5_AXR1, \
+                CSL_CONTROL_CORE_PAD_IO_PAD_MCASP5_AXR1_MCASP5_AXR1_MUXMODE, \
+            0x0);
+#endif
+
+        // McASP3 Module Control
         HW_WR_FIELD32(CSL_DSP_L4PER_CM_CORE_REGS+CSL_L4PER_CM_CORE_COMPONENT_CM_L4PER2_MCASP3_CLKCTRL_REG, \
                 CSL_L4PER_CM_CORE_COMPONENT_CM_L4PER2_MCASP3_CLKCTRL_REG_MODULEMODE, \
                 CSL_L4PER_CM_CORE_COMPONENT_CM_L4PER2_MCASP3_CLKCTRL_REG_MODULEMODE_ENABLE);
@@ -243,7 +267,7 @@ void McASP3_Enable1(void)  //modify by hum
                 CSL_L4PER_CM_CORE_COMPONENT_CM_L4PER2_MCASP3_CLKCTRL_REG_MODULEMODE_ENABLE) ;
 
 
-     /* PAD IO Config for McASP3 pins - ACLKX, AFSX, AXR0, AXR1*/
+     // PAD IO Config for McASP3 pins - ACLKX, AFSX, AXR0, AXR1
 
         HW_WR_FIELD32(CSL_DSP_CORE_PAD_IO_REGISTERS_REGS+CSL_CONTROL_CORE_PAD_IO_PAD_MCASP3_ACLKX, \
             CSL_CONTROL_CORE_PAD_IO_PAD_MCASP3_ACLKX_MCASP3_ACLKX_MUXMODE, \
@@ -257,6 +281,7 @@ void McASP3_Enable1(void)  //modify by hum
         HW_WR_FIELD32(CSL_DSP_CORE_PAD_IO_REGISTERS_REGS+CSL_CONTROL_CORE_PAD_IO_PAD_MCASP3_AXR1, \
                 CSL_CONTROL_CORE_PAD_IO_PAD_MCASP3_AXR1_MCASP3_AXR1_MUXMODE, \
             0x0);
+
 
         //HW_WR_REG32(0x4AE06160, 0x1); // CM_CLKSEL_CLKOUT2: 0x1: Selects SYS_CLK2
         HW_WR_FIELD32(CSL_DSP_CKGEN_PRM_REGS+CSL_CKGEN_PRM_CM_CLKSEL_CLKOUTMUX2_REG, \
@@ -317,7 +342,7 @@ void configMcASP_SocHwInfo()
   */
     Mcasp_HwInfo hwInfo;
 
-    Mcasp_socGetInitCfg(MCASP_NUM, &hwInfo);
+    Mcasp_socGetInitCfg(MCASP_MIC_ARRAY_NUM, &hwInfo);
 
     if(hwInfo.muxNum==MCASP_INVALID_MUX_NUM)
     {
@@ -369,7 +394,25 @@ void configMcASP_SocHwInfo()
     }
 
     /* Write back */
-    Mcasp_socSetInitCfg(MCASP_NUM,&hwInfo);
+    Mcasp_socSetInitCfg(MCASP_MIC_ARRAY_NUM,&hwInfo);
+
+    Mcasp_socGetInitCfg(MCASP_PLAYBACK_NUM, &hwInfo);
+
+    if(hwInfo.muxNum==MCASP_INVALID_MUX_NUM)
+    {
+        /* Choosing a free Crossbar Instance number from Table 17-3. DSP1_INTC Default Interrupt Mapping
+         * in the AM572x TRM . Please note that this is fore Core 0 , i.e DSP1 only*/
+        /* Freely available cross bar instance numbers for DSP1 */
+        hwInfo.txMuxOutEvent=CSL_XBAR_INST_DSP1_IRQ_74;
+        hwInfo.rxMuxOutEvent=CSL_XBAR_INST_DSP1_IRQ_75;
+        /* The CPU event numbers corresponding to the above  */
+        hwInfo.cpuTxEventNumber = 74;
+        hwInfo.cpuRxEventNumber = 75;
+
+        hwInfo.muxNum=MUXINTCP_CROSSBAR_MUXNUM_DSP1; /* We use DSP1 for this demo */
+    }
+    Mcasp_socSetInitCfg(MCASP_PLAYBACK_NUM,&hwInfo);
+
 }
 /* ========================================================================== */
 /*                              END OF FILE                                   */

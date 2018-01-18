@@ -128,7 +128,9 @@ Ptr rxbuf[NUM_BUFS];
 Ptr txbuf[NUM_BUFS];
 
 /* McASP Device handles */
-Ptr  hMcaspDev;
+//Ptr  hMcaspDev;
+Ptr  hMcaspDev_MicArray;
+Ptr  hMcaspDev_PlayBack;
 
 /* McASP Device parameters */
 Mcasp_Params mcaspParams;
@@ -137,6 +139,7 @@ Mcasp_Params mcaspParams;
 /* Channel Handles */
 Ptr hMcaspTxChan;
 Ptr hMcaspRxChan;
+Ptr hMcaspTxChan_temp;
 
 int rxFrameIndex=(NUM_BUFS-1), txFrameIndex=(NUM_BUFS-1);
 volatile int RxFlag=0,TxFlag=0;
@@ -215,6 +218,16 @@ void mcaspAppCallback(void* arg, MCASP_Packet *ioBuf)
 		Semaphore_post(semT);
 		}
 
+}
+void mcaspAppCallback1(void* arg, MCASP_Packet *ioBuf)
+{
+
+    if(ioBuf->cmd == MCASP_READ)
+    {
+         MCASP_log("Rx Buf Address mismatch\n");
+    }
+    if(ioBuf->cmd == MCASP_WRITE)
+         MCASP_log("Tx Buf Address mismatch\n");
 }
 /*
  * This call back is used during interrupt processing and is defined by the
@@ -324,7 +337,7 @@ static Void createStreams()
     mcasp_chanparam[1].edmaHandle = hEdma;
 
 	/* Create Mcasp channel for Tx */
-	status = mcaspCreateChan(&hMcaspTxChan, hMcaspDev,
+	status = mcaspCreateChan(&hMcaspTxChan, hMcaspDev_PlayBack,
 							 MCASP_OUTPUT,
 							 &mcasp_chanparam[1],
 							 mcaspAppCallback, NULL);
@@ -336,15 +349,24 @@ static Void createStreams()
 	}
 
 	/* Create Mcasp channel for Rx */
-	status = mcaspCreateChan(&hMcaspRxChan, hMcaspDev,
+	status = mcaspCreateChan(&hMcaspRxChan, hMcaspDev_MicArray,
 	                         MCASP_INPUT,
 	                         &mcasp_chanparam[0],
 	                         mcaspAppCallback, NULL);
 	if((status != MCASP_COMPLETED) || (hMcaspRxChan == NULL))
 	{
-		MCASP_log("mcaspCreateChan for McASP2 Rx Failed\n");
+		MCASP_log("mcaspCreateChan for McASP3 Rx Failed\n");
 		BIOS_exit(0);
 	}
+	status = mcaspCreateChan(&hMcaspTxChan_temp, hMcaspDev_MicArray,
+	                             MCASP_OUTPUT,
+	                             &mcasp_chanparam[1],
+	                             mcaspAppCallback1, NULL);
+	    if((status != MCASP_COMPLETED) || (hMcaspRxChan == NULL))
+	    {
+	        MCASP_log("mcaspCreateChan for McASp3 tx Failed\n");
+	        BIOS_exit(0);
+	    }
 #if defined(MCASP_MASTER) 
 /* If MCASP master, configure the clock of the slave device attached to McASP now.
     In the below case, it is the AIC codec */
@@ -489,7 +511,9 @@ int total_frames_sent=0;
 Void Audio_echo_Task()
 {
     volatile int32_t i32Count, status = 0;
-	hMcaspDev  = NULL;
+	//hMcaspDev  = NULL;
+	hMcaspDev_MicArray = NULL;
+	hMcaspDev_PlayBack = NULL;
     uint32_t tx_bytes_per_sample=(mcasp_chanparam[1].wordWidth/8);
     uint32_t rx_bytes_per_sample=(mcasp_chanparam[0].wordWidth/8);
     /* This represents the actual  number of bytes being transferred by the
@@ -517,8 +541,8 @@ Void Audio_echo_Task()
     /* 1. EDMA Initializations */
     EDMA3_DRV_Result edmaResult = 0;
 
-	enableEDMAHwEvent(EDMACC_NUM,MCASP_RX_DMA_CH);
-    enableEDMAHwEvent(EDMACC_NUM,MCASP_TX_DMA_CH);
+	enableEDMAHwEvent(EDMACC_NUM,MCASP_RX_DMA_MIC_ARRAY);
+    enableEDMAHwEvent(EDMACC_NUM,MCASP_TX_DMA_PLAYBACK);
 	
     hEdma = edma3init(EDMACC_NUM, &edmaResult);
 
@@ -554,12 +578,18 @@ Void Audio_echo_Task()
 
 #endif
 
-	status = mcaspBindDev(&hMcaspDev, MCASP_NUM, &mcaspParams);
-	if((status != MCASP_COMPLETED) || (hMcaspDev == NULL))
+	status = mcaspBindDev(&hMcaspDev_MicArray, MCASP_MIC_ARRAY_NUM, &mcaspParams);
+	if((status != MCASP_COMPLETED) || (hMcaspDev_MicArray == NULL))
 	{
-		MCASP_log("mcaspBindDev for McASP Failed\n");
+		MCASP_log("mcaspBindDev for McASP MicArray Failed\n");
 		abort();
 	}
+    status = mcaspBindDev(&hMcaspDev_PlayBack, MCASP_PLAYBACK_NUM, &mcaspParams);
+    if((status != MCASP_COMPLETED) || (hMcaspDev_PlayBack == NULL))
+    {
+        MCASP_log("mcaspBindDev for McASP PlayBack Failed\n");
+        abort();
+    }
 
 #if defined(AIC_CODEC)
 	/* Bind AIC Codec */
@@ -706,8 +736,10 @@ Void Audio_echo_Task()
         status = mcaspDeleteChan(hMcaspRxChan);
         MCASP_log("\nDeleting Tx channel");
         status = mcaspDeleteChan(hMcaspTxChan);
-        MCASP_log("\nUnBinding Mcasp");
-    	status = mcaspUnBindDev(hMcaspDev);
+        MCASP_log("\nUnBinding Mcasp MicArray");
+    	status = mcaspUnBindDev(hMcaspDev_MicArray);
+    	MCASP_log("\nUnBinding Mcasp PlayBack");
+    	status = mcaspUnBindDev(hMcaspDev_PlayBack);
 
 		{
 			IHeap_Handle iheap;

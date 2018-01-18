@@ -69,6 +69,8 @@ extern void CodecRegBitClr(unsigned int baseAddr,unsigned char slaveAddr, unsign
                            unsigned char bitMask);
 extern unsigned char CodecRegRead(unsigned int baseAddr,unsigned char slaveAddr,
                                   unsigned char regAddr);
+extern void CodecRegWrite_wm8960(unsigned int baseAddr, unsigned char slaveAddr,unsigned char regAddr,
+                   unsigned int regData);
 
 #endif
 

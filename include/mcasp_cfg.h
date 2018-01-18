@@ -71,19 +71,31 @@ extern "C"
 {
 #endif
 
-#define MCASP_NUM 2
+
 #define EDMACC_NUM 0
+//I2C CFG
 #define SOC_I2C_1_REGS CSL_DSP_I2C4_REGS
 #define I2C_MCASP_INSTANCE 3
 
 #define AIC31_NUM_INSTANCES   1
 #define AIC31_INST0_ADDRESS   0x4a//0x4a//0x1a
-
-#define MCASP_RX_DMA_CH  CSL_EDMA3_CHA_MCASP2_RX
-#define MCASP_TX_DMA_CH  CSL_EDMA3_CHA_MCASP2_TX
-
 //I2C slave addr
-#define AIC31_I2C_ADDR 0X18
+#define AIC31_I2C_ADDR      0x18
+#define PW8960_I2C_ADDR     0x1a
+#define PCM1864_I2C_ADDR    0x4a
+#define PCM1864_2_I2C_ADDR    0x4b
+
+//MCASP CFG
+//#define MCASP_RX_DMA_CH  CSL_EDMA3_CHA_MCASP2_RX
+//#define MCASP_TX_DMA_CH  CSL_EDMA3_CHA_MCASP2_TX
+//#define MCASP_NUM 2
+#define MCASP_MIC_ARRAY_NUM     2
+#define MCASP_PLAYBACK_NUM      4
+#define MCASP_RX_DMA_MIC_ARRAY  CSL_EDMA3_CHA_MCASP2_RX
+#define MCASP_TX_DMA_PLAYBACK   CSL_EDMA3_CHA_MCASP4_TX
+
+
+
 
 extern void GblErr(int arg);
 extern Mcasp_HwSetupData mcaspRcvSetup;

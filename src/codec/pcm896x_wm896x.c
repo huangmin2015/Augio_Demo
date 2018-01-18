@@ -84,7 +84,7 @@ static const struct Reg_table pcm186x_reg_slave_mode[] = {
  void PCM1864_init(unsigned int baseAddr,unsigned char slaveAddr)
  {
      //AUDIO ADC INIT;
-     CodecRegWrite_PCM1864(baseAddr,slaveAddr,0x00,0xff);
+     //CodecRegWrite_PCM1864(baseAddr,slaveAddr,0x00,0xff);
      CodecRegWrite_PCM1864(baseAddr,slaveAddr,0x00,0x00);
      CodecRegWrite_PCM1864(baseAddr,slaveAddr,0x06,0x41);
      CodecRegWrite_PCM1864(baseAddr,slaveAddr,0x07,0x41);
