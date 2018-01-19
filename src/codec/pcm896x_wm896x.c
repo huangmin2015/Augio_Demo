@@ -67,8 +67,8 @@ static const struct Reg_table pcm186x_reg_slave_mode[] = {
      CodecRegWrite_wm8960(baseAddr,slaveAddr, 0x31,  1 <<7 | 1<<6 );
 
     //setup input  INPUT1 INPUT2 INPUT3 CONNECTED TO ADC
-     CodecRegWrite_wm8960(baseAddr,slaveAddr, 0x20, 1<<8 | 1 <<7 | 1 <<6  | 1 <<3);
-     CodecRegWrite_wm8960(baseAddr,slaveAddr, 0x21, 1<<8 | 1 <<7 | 1 <<6  | 1 <<3);
+    // CodecRegWrite_wm8960(baseAddr,slaveAddr, 0x20, 1<<8 | 1 <<7 | 1 <<6  | 1 <<3);
+    // CodecRegWrite_wm8960(baseAddr,slaveAddr, 0x21, 1<<8 | 1 <<7 | 1 <<6  | 1 <<3);
 
      CodecRegWrite_wm8960(baseAddr,slaveAddr, 0x00, 0x117);
      CodecRegWrite_wm8960(baseAddr,slaveAddr, 0x01, 0x117);

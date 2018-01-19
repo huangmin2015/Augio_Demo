@@ -246,7 +246,7 @@ Mcasp_ChanParams  mcasp_chanparam[2]=
 {
     {
         RX_NUM_SERIALIZER,         /* number of serialisers      */
-        {Mcasp_SerializerNum_1, Mcasp_SerializerNum_3}, /* serialiser index           */
+        {Mcasp_SerializerNum_8, Mcasp_SerializerNum_9, Mcasp_SerializerNum_10, Mcasp_SerializerNum_11, Mcasp_SerializerNum_12, Mcasp_SerializerNum_13, Mcasp_SerializerNum_14, Mcasp_SerializerNum_15}, /* serialiser index           */
         &mcaspRcvSetup,
         TRUE,
         Mcasp_OpMode_TDM,          /* Mode (TDM/DIT)             */
