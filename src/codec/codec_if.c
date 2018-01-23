@@ -80,6 +80,8 @@ volatile unsigned int txCompFlag = 1;
 volatile unsigned char slaveData[3];
 volatile unsigned int dataMax;
 I2C_Handle I2C_handle_glob = NULL;
+I2C_Handle I2c3_handle=NULL;
+I2C_Handle I2c4_handle=NULL;
 unsigned int I2C_slaveAddr = 0;
 
 static void I2CCodecuDelay(unsigned int delay)
@@ -106,7 +108,7 @@ static void I2CCodecuDelay(unsigned int delay)
  * \return  None.
  *
  **/
-void I2CCodecIfInit(unsigned int baseAddr, unsigned int intCh,
+void I2CCodecIfInit1(unsigned int baseAddr, unsigned int intCh,
                     unsigned int slaveAddr)
 {
     I2C_Params i2cParams;
@@ -125,6 +127,28 @@ void I2CCodecIfInit(unsigned int baseAddr, unsigned int intCh,
     I2C_socSetInitCfg(I2C_MCASP_INSTANCE, &mcasp_i2c_cfg);
     I2C_handle_glob = I2C_open(I2C_MCASP_INSTANCE, &i2cParams);
 }
+void I2CCodecIfInit_for_MicArray(unsigned int baseAddr, unsigned int i2c_instance,unsigned int intCh)
+{
+    I2C_Params i2cParams;
+	I2C_HwAttrs mcasp_i2c_cfg;
+	I2C_Handle I2C_handle;
+	//I2C_init();
+
+    I2C_Params_init(&i2cParams);
+    i2cParams.transferMode = I2C_MODE_BLOCKING;
+
+    I2C_socGetInitCfg(i2c_instance, &mcasp_i2c_cfg);
+
+    /* Modify the default I2C configurations if necessary */
+    mcasp_i2c_cfg.enableIntr=false; 
+    /* Set the default I2C init configurations */
+    I2C_socSetInitCfg(i2c_instance, &mcasp_i2c_cfg);
+    if(baseAddr==SOC_I2C_3_REGS)
+        I2c3_handle = I2C_open(i2c_instance, &i2cParams);
+    else
+        I2c4_handle = I2C_open(i2c_instance, &i2cParams);
+
+}
 
 /*
 ** Function to send data through i2c
@@ -139,7 +163,11 @@ static unsigned int I2CCodecSendBlocking(unsigned int baseAddr,unsigned char sla
     i2cTransaction.writeCount = dataCnt;
     i2cTransaction.readBuf = (uint8_t *)NULL;
     i2cTransaction.readCount = 0;
-    status = I2C_transfer(I2C_handle_glob, &i2cTransaction);
+    if(baseAddr==SOC_I2C_3_REGS)
+        status = I2C_transfer(I2c3_handle, &i2cTransaction);
+    else
+        status = I2C_transfer(I2c4_handle, &i2cTransaction);
+
     I2CCodecuDelay(0xFF00);
     return (status);
 }
@@ -160,7 +188,10 @@ static unsigned int I2CCodecRcvBlocking(unsigned int baseAddr,unsigned char slav
     i2cTransaction.writeCount = 1;
     i2cTransaction.readBuf = (uint8_t *)&slaveData[0];
     i2cTransaction.readCount = dataCnt;
-    status = I2C_transfer(I2C_handle_glob, &i2cTransaction);
+    if(baseAddr==SOC_I2C_3_REGS)
+            status = I2C_transfer(I2c3_handle, &i2cTransaction);
+        else
+            status = I2C_transfer(I2c4_handle, &i2cTransaction);
 
     return (status);
 

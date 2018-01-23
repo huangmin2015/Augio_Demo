@@ -305,6 +305,7 @@ static Void createStreams()
 {
 	int status;
 
+
     int mode = IOM_INPUT;
 	char remName[10]="aic";
 #if !defined(MCASP_MASTER)
@@ -328,6 +329,7 @@ static Void createStreams()
 		MCASP_log("AIC Create Channel Failed\n");
 		BIOS_exit(0);
 	}
+
 #endif
 	
 #endif
@@ -371,7 +373,7 @@ static Void createStreams()
 /* If MCASP master, configure the clock of the slave device attached to McASP now.
     In the below case, it is the AIC codec */
 
-#if defined(AIC_CODEC)
+#if defined(AIC_CODEC__)
 	status = aic31MdCreateChan(
 		&hAicChannel,
 		hAicDev,
@@ -390,6 +392,16 @@ static Void createStreams()
 	{
 
 	}
+#else
+	//config i2c bus and codec
+
+	I2CCodecIfInit_for_MicArray(SOC_I2C_3_REGS,I2C_3_INSTANCE,2);
+	I2CCodecIfInit_for_MicArray(SOC_I2C_4_REGS,I2C_4_INSTANCE,2);
+    wm8960_init(SOC_I2C_3_REGS,PW8960_I2C_ADDR);
+    PCM1864_init(SOC_I2C_3_REGS,PCM1864_I2C3_1_ADDR );
+    PCM1864_init(SOC_I2C_3_REGS,PCM1864_I2C3_2_ADDR );
+    PCM1864_init(SOC_I2C_4_REGS,PCM1864_I2C3_1_ADDR );
+    PCM1864_init(SOC_I2C_4_REGS,PCM1864_I2C3_2_ADDR );
 #endif
 
 #endif
@@ -522,6 +534,7 @@ Void Audio_echo_Task()
     uint32_t tx_frame_size = BUFLEN*TX_NUM_SERIALIZER*tx_bytes_per_sample;
     uint32_t rx_frame_size = BUFLEN*RX_NUM_SERIALIZER*rx_bytes_per_sample;
     unsigned char cnt=0;
+    unsigned int i;
 
 
 #ifdef MEASURE_TIME
@@ -664,9 +677,12 @@ Void Audio_echo_Task()
 		   to the device here.
 		*/
 		//MCASP_log ("r:%d\n", rx_frame_size);
-		MCASP_log("fn: %d\n",total_frames_sent);
+		//MCASP_log("fn: %d\n",total_frames_sent);
 		cnt++;
-		memcpy((void *)((uint8_t *)txbuf[gtxFrameIndexCount]),(void *)((uint8_t *)rxbuf[grxFrameIndexCount]),rx_frame_size);
+		for(i=0;i<1024;i++)
+		   *(((uint32_t *)txbuf[gtxFrameIndexCount])+i) = (*(((uint32_t *)rxbuf[grxFrameIndexCount])+i*8+1));
+
+		//memcpy((void *)((uint8_t *)txbuf[gtxFrameIndexCount]),(void *)((uint8_t *)rxbuf[grxFrameIndexCount]),tx_frame_size);
 		//memset((void *)((uint8_t *)txbuf[gtxFrameIndexCount]),cnt,rx_frame_size);
 #endif
 

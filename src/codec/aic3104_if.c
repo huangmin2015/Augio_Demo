@@ -184,8 +184,8 @@ void AIC31Reset(unsigned int baseAddr)
 {
     /* Select Page 0 */
     regval=5;
-    wm8960_init(baseAddr,PW8960_I2C_ADDR);
-    PCM1864_init(baseAddr,PCM1864_I2C_ADDR );
+    //wm8960_init(baseAddr,PW8960_I2C_ADDR);
+   // PCM1864_init(baseAddr,PCM1864_I2C_ADDR );
    // PCM1864_init(baseAddr,PW8960_I2C_ADDR);
     //CodecRegWrite(baseAddr, AIC31_P0_REG0, 0);
 

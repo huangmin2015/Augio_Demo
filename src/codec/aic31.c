@@ -482,7 +482,7 @@ Void Aic31_init(Void)
         instHandle->ChanObj[mode].chanGain 	   = acChanConfig->chanGain;
 
         /* Configure I2C interface for CODEC */
-        I2CCodecIfInit (instHandle->acBaseAddress, 2, instHandle->acCodecId);
+        //I2CCodecIfInit (instHandle->acBaseAddress, 2, instHandle->acCodecId);
         //MCASP_log("sys/bios init codec aic31~~~~~.\n");
         /* Configure the Codec for I2S mode */
         //while(1){

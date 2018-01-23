@@ -77,6 +77,15 @@ extern "C"
 #define SOC_I2C_1_REGS CSL_DSP_I2C3_REGS
 #define I2C_MCASP_INSTANCE 2
 
+
+#define SOC_I2C_3_REGS CSL_DSP_I2C3_REGS
+#define I2C_3_INSTANCE   2
+#define SOC_I2C_4_REGS CSL_DSP_I2C4_REGS
+#define I2C_4_INSTANCE   3
+
+
+
+
 #define AIC31_NUM_INSTANCES   1
 #define AIC31_INST0_ADDRESS   0x4a//0x4a//0x1a
 //I2C slave addr
@@ -84,6 +93,12 @@ extern "C"
 #define PW8960_I2C_ADDR     0x1a
 #define PCM1864_I2C_ADDR    0x4a
 #define PCM1864_2_I2C_ADDR    0x4b
+#define PCM1864_I2C3_1_ADDR    0x4a
+#define PCM1864_I2C3_2_ADDR    0x4b
+#define PCM1864_I2C4_1_ADDR    0x4a
+#define PCM1864_I2C4_2_ADDR    0x4b
+
+
 
 //MCASP CFG
 //#define MCASP_RX_DMA_CH  CSL_EDMA3_CHA_MCASP2_RX
@@ -109,7 +124,7 @@ extern ICodec_ChannelConfig AIC31_config;
 #define RX_NUM_SERIALIZER       (2u)
 #define TX_NUM_SERIALIZER       (2u)
 #else
-#define RX_NUM_SERIALIZER       (1u)
+#define RX_NUM_SERIALIZER       (8u)
 #define TX_NUM_SERIALIZER       (1u)
 #endif
 
